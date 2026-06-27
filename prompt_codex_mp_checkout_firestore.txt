@@ -1,0 +1,1119 @@
+Actúa como arquitecto de software y desarrollador senior Python especializado en FastAPI, Cloud Firestore, APIs REST, webhooks e integraciones de pagos con Mercado Pago Checkout Pro.
+
+Quiero que desarrolles un proyecto funcional de prueba para integrar Mercado Pago Checkout Pro usando Python, FastAPI y Cloud Firestore como única base de datos.
+
+No usar SQL, SQLite, SQLAlchemy, SQLModel ni bases de datos relacionales.
+
+## Objetivo general
+
+Crear una aplicación que permita:
+
+1. Crear una orden interna.
+2. Guardar la orden en Cloud Firestore.
+3. Crear una preferencia de pago mediante la API de Mercado Pago.
+4. Mostrar un HTML local con un botón de pago.
+5. Redirigir al comprador a Mercado Pago Checkout Pro.
+6. Recibir notificaciones mediante un webhook público alojado en FastAPI Cloud.
+7. Validar la firma de los webhooks de Mercado Pago.
+8. Consultar el pago real mediante la API de Mercado Pago.
+9. Guardar y actualizar pagos en Firestore.
+10. Actualizar el estado de la orden relacionada.
+11. Mostrar una página HTML de resultado mediante back URLs públicas.
+12. Implementar idempotencia para webhooks, pagos y órdenes.
+13. Detectar diferencias de monto o moneda.
+14. Registrar alertas de conciliación.
+15. Dejar una arquitectura preparada para incorporar posteriormente OAuth Partner, múltiples vendedores, reportes financieros, movimientos de billetera, Google Sheets, Looker Studio, Cloud Tasks, Pub/Sub y automatizaciones.
+
+## Contexto actual
+
+Ya tengo:
+
+- Una app de prueba creada en Mercado Pago.
+- Credenciales de prueba.
+- Access Token de prueba.
+- Public Key de prueba.
+- Secreto para validar webhooks.
+- Cuenta en FastAPI Cloud.
+- Proyecto de Google Cloud.
+- Firestore en Native Mode.
+- Documentación oficial de Mercado Pago revisada.
+
+El HTML del botón de pago se ejecutará localmente con:
+
+python -m http.server 5500
+
+Los endpoints de webhook y back URLs deben ser públicos y estarán alojados en FastAPI Cloud.
+
+## Stack obligatorio
+
+Usar:
+
+- Python 3.12 o superior.
+- FastAPI.
+- Uvicorn.
+- httpx.
+- Pydantic.
+- pydantic-settings.
+- Jinja2.
+- google-cloud-firestore.
+- Cloud Firestore en Native Mode.
+- Firestore Emulator para desarrollo y tests.
+- pytest.
+- pytest-asyncio.
+- logging estándar de Python.
+- Ruff para linting y formato.
+
+No usar:
+
+- SQLAlchemy.
+- SQLModel.
+- SQLite.
+- PostgreSQL.
+- MySQL.
+- Bases SQL.
+- Frameworks frontend complejos.
+
+## Principios de diseño
+
+Aplicar:
+
+- Separación por módulos.
+- Programación orientada a objetos cuando aporte claridad.
+- Modelos Pydantic.
+- Tipado completo.
+- Docstrings.
+- Manejo de errores.
+- Logging.
+- Variables de entorno.
+- Idempotencia.
+- Seguridad básica.
+- Firestore orientado a consultas.
+- IDs determinísticos.
+- Transacciones atómicas.
+- Timestamps de servidor.
+- Código fácil de mantener.
+- No exponer nunca el Access Token en el frontend.
+- No guardar secretos en Git.
+- No confiar en el estado recibido por una back URL.
+- No confiar únicamente en el contenido del webhook.
+- Consultar siempre el pago real mediante la API de Mercado Pago.
+- No realizar llamadas HTTP dentro de una transacción Firestore.
+- No almacenar importes monetarios como float.
+
+## Arquitectura esperada
+
+Crear una estructura similar a:
+
+mp-checkout-pro-firestore/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config.py
+│   ├── dependencies.py
+│   ├── logging_config.py
+│   ├── firestore/
+│   │   ├── __init__.py
+│   │   ├── client.py
+│   │   ├── collections.py
+│   │   └── transactions.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── order.py
+│   │   ├── payment.py
+│   │   ├── webhook_event.py
+│   │   └── payment_alert.py
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── checkout.py
+│   │   ├── order.py
+│   │   ├── payment.py
+│   │   └── webhook.py
+│   ├── repositories/
+│   │   ├── __init__.py
+│   │   ├── order_repository.py
+│   │   ├── payment_repository.py
+│   │   ├── webhook_repository.py
+│   │   └── alert_repository.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── mercado_pago_service.py
+│   │   ├── order_service.py
+│   │   ├── payment_service.py
+│   │   ├── webhook_service.py
+│   │   └── money_service.py
+│   ├── routers/
+│   │   ├── __init__.py
+│   │   ├── checkout.py
+│   │   ├── webhooks.py
+│   │   ├── returns.py
+│   │   ├── orders.py
+│   │   ├── payments.py
+│   │   └── health.py
+│   └── templates/
+│       ├── payment_result.html
+│       └── error.html
+├── static/
+│   └── checkout.html
+├── tests/
+│   ├── conftest.py
+│   ├── test_health.py
+│   ├── test_checkout.py
+│   ├── test_webhooks.py
+│   ├── test_returns.py
+│   ├── test_orders.py
+│   ├── test_payments.py
+│   ├── test_money.py
+│   └── test_firestore_transactions.py
+├── scripts/
+│   ├── run_local.sh
+│   ├── run_emulators.sh
+│   ├── test_webhook.sh
+│   └── test_checkout.sh
+├── firebase.json
+├── firestore.indexes.json
+├── firestore.rules
+├── .firebaserc.example
+├── .env.example
+├── .gitignore
+├── pyproject.toml
+├── README.md
+└── AGENTS.md
+
+## Variables de entorno
+
+Usar como mínimo:
+
+ENVIRONMENT=development
+
+MP_ACCESS_TOKEN=TEST-xxxxxxxx
+MP_PUBLIC_KEY=TEST-xxxxxxxx
+MP_WEBHOOK_SECRET=xxxxxxxx
+
+BASE_URL=https://mi-app.fastapicloud.com
+
+MP_SUCCESS_URL=https://mi-app.fastapicloud.com/checkout/success
+MP_FAILURE_URL=https://mi-app.fastapicloud.com/checkout/failure
+MP_PENDING_URL=https://mi-app.fastapicloud.com/checkout/pending
+MP_WEBHOOK_URL=https://mi-app.fastapicloud.com/webhooks/mercadopago
+
+GOOGLE_CLOUD_PROJECT=mi-proyecto-gcp
+
+LOCAL_FRONTEND_ORIGIN=http://localhost:5500
+
+FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+USE_FIRESTORE_EMULATOR=false
+
+Crear .env.example, pero no incluir secretos reales.
+
+No guardar archivos JSON de Service Account en Git.
+
+## Autenticación con Google Cloud
+
+Implementar compatibilidad con:
+
+1. Desarrollo local contra Firestore real usando Application Default Credentials:
+   gcloud auth application-default login
+
+2. Desarrollo y tests con emulador:
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+   export GOOGLE_CLOUD_PROJECT=mp-checkout-pro-test
+
+3. Producción en Google Cloud usando Service Account e IAM.
+
+4. Producción fuera de Google Cloud usando secretos del proveedor.
+
+No incorporar credenciales sensibles dentro del repositorio.
+
+## Cliente Firestore
+
+Preferir el cliente asíncrono:
+
+from google.cloud.firestore_v1.async_client import AsyncClient
+
+Mantener una única instancia reutilizable mediante dependencias de FastAPI.
+
+No crear un nuevo cliente Firestore en cada request.
+
+No mezclar APIs del cliente síncrono con el cliente asíncrono.
+
+Si alguna característica necesaria no está correctamente soportada por AsyncClient, documentar la razón técnica antes de utilizar el cliente síncrono.
+
+## Colecciones Firestore
+
+Crear:
+
+orders
+payments
+webhook_events
+payment_alerts
+
+Preparar constantes centralizadas para sus nombres.
+
+## Identificadores determinísticos
+
+Usar:
+
+orders/{order_id}
+payments/{mercado_pago_payment_id}
+webhook_events/{event_key}
+payment_alerts/{alert_id}
+
+No usar IDs automáticos para órdenes, pagos, eventos webhook ni alertas derivadas de inconsistencias determinísticas.
+
+El external_reference enviado a Mercado Pago debe ser igual al order_id.
+
+## Modelo de orden
+
+Colección:
+
+orders/{order_id}
+
+Campos sugeridos:
+
+order_id
+external_reference
+title
+quantity
+unit_price_minor
+total_amount_minor
+currency_id
+preference_id
+checkout_url
+sandbox_checkout_url
+internal_status
+mp_payment_status
+mp_payment_status_detail
+mercado_pago_payment_id
+live_mode
+created_at
+updated_at
+last_payment_update_at
+
+Estados internos sugeridos:
+
+created
+preference_created
+pending
+approved
+rejected
+cancelled
+refunded
+charged_back
+error
+manual_review
+
+El ID del documento debe coincidir con order_id.
+
+## Modelo de pago
+
+Colección:
+
+payments/{payment_id}
+
+Campos sugeridos:
+
+mercado_pago_payment_id
+order_id
+external_reference
+status
+status_detail
+transaction_amount_minor
+currency_id
+payment_type_id
+payment_method_id
+installments
+live_mode
+date_created
+date_approved
+date_last_updated
+raw_payment
+created_at
+updated_at
+
+Usar el ID de pago de Mercado Pago como ID del documento.
+
+## Modelo de evento webhook
+
+Colección:
+
+webhook_events/{event_key}
+
+Construir event_key de forma determinística.
+
+Formato sugerido:
+
+{event_id}_{action}_{resource_id}
+
+Normalizar caracteres si fuera necesario para que el ID sea válido y estable.
+
+Campos:
+
+event_key
+mercado_pago_event_id
+event_type
+action
+resource_id
+request_id
+signature_present
+processing_status
+attempts
+payload
+last_error
+received_at
+processing_started_at
+processed_at
+updated_at
+
+Estados de procesamiento:
+
+received
+processing
+completed
+ignored
+failed
+
+Un webhook duplicado debe reutilizar el mismo documento.
+
+## Modelo de alerta
+
+Colección:
+
+payment_alerts/{alert_id}
+
+Tipos de alerta iniciales:
+
+amount_mismatch
+currency_mismatch
+order_not_found
+invalid_state_transition
+payment_without_external_reference
+payment_api_error
+webhook_processing_error
+
+Campos:
+
+alert_id
+type
+severity
+order_id
+payment_id
+expected_value
+received_value
+message
+resolved
+created_at
+updated_at
+
+Para alertas determinísticas usar un ID basado en:
+
+{type}_{order_id}_{payment_id}
+
+Evitar duplicar la misma alerta.
+
+## Importes monetarios
+
+No almacenar dinero como float.
+
+Usar unidades mínimas de moneda:
+
+unit_price_minor
+total_amount_minor
+transaction_amount_minor
+
+Ejemplo:
+
+ARS 1500,00 -> 150000
+
+Crear funciones específicas para convertir:
+
+Decimal("1500.00") -> 150000
+150000 -> Decimal("1500.00")
+
+Usar Decimal durante las conversiones.
+
+## Flujo de creación de orden y preferencia
+
+Crear:
+
+POST /checkout/preference
+
+Debe:
+
+1. Recibir una solicitud validada mediante Pydantic.
+2. Generar un UUID como order_id.
+3. Usar el mismo UUID como external_reference.
+4. Determinar el precio real en el backend.
+5. Convertir el monto a unidades mínimas.
+6. Crear el documento orders/{order_id}.
+7. Usar una operación que falle si la orden ya existe.
+8. Crear una preferencia mediante:
+   POST https://api.mercadopago.com/checkout/preferences
+9. Incluir items, external_reference, back_urls, auto_return, notification_url y metadata.order_id.
+10. Guardar preference_id, init_point, sandbox_init_point y estado preference_created.
+11. Si Mercado Pago responde con error, mantener la orden, cambiar su estado a error y registrar el error sin guardar secretos.
+12. Devolver order_id, external_reference, preference_id y checkout_url.
+
+Documentar la diferencia entre init_point y sandbox_init_point.
+
+## HTML local
+
+Crear:
+
+static/checkout.html
+
+Debe:
+
+- Ejecutarse desde http://localhost:5500.
+- Mostrar un producto de prueba.
+- Mostrar un importe.
+- Tener un botón “Pagar con Mercado Pago”.
+- Hacer un fetch al endpoint público de FastAPI Cloud.
+- Solicitar la creación de una orden y preferencia.
+- Redirigir a checkout_url.
+- Mostrar mensajes de carga.
+- Mostrar errores.
+- Deshabilitar temporalmente el botón para evitar dobles clics.
+- No contener Access Token.
+- No conectarse directamente a Firestore.
+- No tratar el precio enviado desde el navegador como valor confiable.
+
+Flujo permitido:
+
+HTML local -> FastAPI -> Mercado Pago -> Firestore
+
+No:
+
+HTML local -> Firestore
+
+## CORS
+
+Permitir únicamente:
+
+http://localhost:5500
+http://127.0.0.1:5500
+
+No usar allow_origins=["*"] en producción.
+
+## Servicio Mercado Pago
+
+Crear:
+
+class MercadoPagoService:
+    ...
+
+Debe incluir:
+
+async def create_preference(...)
+async def get_payment(payment_id: str)
+
+Usar httpx.AsyncClient.
+
+Agregar timeout, manejo de errores, códigos HTTP, parseo validado, excepción propia y logging seguro.
+
+Ejemplo:
+
+class MercadoPagoAPIError(Exception):
+    ...
+
+No registrar Access Token, secreto del webhook ni header Authorization.
+
+## Webhook
+
+Crear:
+
+POST /webhooks/mercadopago
+
+Debe:
+
+1. Leer x-signature, x-request-id, query parameter data.id, body JSON, type, action y data.id.
+2. Resolver correctamente el identificador del recurso.
+3. Validar la firma siguiendo exactamente la documentación oficial actual de Mercado Pago.
+4. No inventar el formato del manifest de firma.
+5. Si el SDK oficial tiene un validador estable, se puede utilizar.
+6. Rechazar una firma inválida con HTTP 401.
+7. Construir un event_key determinístico.
+8. Crear o leer webhook_events/{event_key}.
+9. Detectar eventos ya completados.
+10. Si el evento ya fue procesado, no repetir operaciones y responder HTTP 200.
+11. Consultar el pago real mediante:
+    GET https://api.mercadopago.com/v1/payments/{payment_id}
+12. No usar únicamente el payload del webhook como fuente de verdad.
+13. Validar external_reference, transaction_amount, currency_id, status y status_detail.
+14. Actualizar atómicamente webhook, pago, orden y alerta si corresponde.
+15. Responder HTTP 200 cuando el evento se haya recibido correctamente.
+
+## Regla crítica sobre transacciones
+
+No hacer llamadas HTTP a Mercado Pago dentro de una transacción de Firestore.
+
+Flujo correcto:
+
+1. Recibir webhook.
+2. Validar firma.
+3. Consultar pago en Mercado Pago.
+4. Validar respuesta.
+5. Iniciar transacción Firestore.
+6. Leer estado actual del evento y de la orden.
+7. Aplicar cambios atómicos.
+8. Confirmar transacción.
+9. Responder.
+
+Las transacciones Firestore pueden reintentarse, por lo que no deben contener efectos externos.
+
+## Idempotencia del webhook
+
+Implementar idempotencia con:
+
+- ID determinístico del evento.
+- ID determinístico del pago.
+- Transacción Firestore.
+- Verificación de processing_status.
+- Restricciones lógicas por estado.
+
+Un webhook duplicado debe:
+
+- responder HTTP 200;
+- no crear otro evento;
+- no duplicar el pago;
+- no duplicar alertas;
+- no repetir una transición ya aplicada;
+- incrementar opcionalmente attempts.
+
+## Concurrencia
+
+Prever que dos instancias de FastAPI procesen simultáneamente el mismo webhook.
+
+Usar una transacción para comprobar y modificar webhook_events/{event_key}.
+
+No depender solamente de una comprobación previa fuera de la transacción.
+
+## Transiciones de estado
+
+Crear:
+
+def can_transition(current_status: str, new_status: str) -> bool:
+    ...
+
+Ejemplos permitidos:
+
+created -> preference_created
+preference_created -> pending
+preference_created -> approved
+pending -> approved
+pending -> rejected
+approved -> refunded
+approved -> charged_back
+
+Evitar transiciones regresivas automáticas como:
+
+approved -> pending
+approved -> created
+refunded -> approved
+
+Si se recibe una transición dudosa, crear una alerta y marcar la orden para revisión manual.
+
+Guardar por separado:
+
+internal_status
+mp_payment_status
+mp_payment_status_detail
+
+## Diferencias de importe
+
+Antes de aprobar una orden, comparar:
+
+orders/{order_id}.total_amount_minor
+
+con:
+
+payments/{payment_id}.transaction_amount_minor
+
+Si no coinciden:
+
+1. No establecer la orden como aprobada automáticamente.
+2. Cambiar internal_status a manual_review.
+3. Crear alerta amount_mismatch.
+4. Guardar monto esperado y recibido.
+5. Mantener el estado original de Mercado Pago en el documento del pago.
+
+Hacer lo mismo ante diferencias de moneda.
+
+## Repositorios
+
+Crear:
+
+OrderRepository
+PaymentRepository
+WebhookEventRepository
+PaymentAlertRepository
+
+Los routers no deben acceder directamente a Firestore.
+
+Los repositorios deben encapsular referencias a documentos, creación, lectura, actualización, consultas y serialización básica.
+
+Los servicios deben contener lógica de negocio.
+
+Flujo:
+
+router -> service -> repository -> Firestore
+
+## Consultas previstas
+
+Diseñar para:
+
+- Obtener orden por order_id.
+- Obtener pago por payment_id.
+- Listar órdenes por estado.
+- Listar pagos por estado y fecha.
+- Listar webhooks fallidos.
+- Listar webhooks pendientes.
+- Listar alertas sin resolver.
+- Listar alertas por severidad.
+
+No descargar colecciones completas para filtrarlas en Python.
+
+Usar límites y paginación cuando corresponda.
+
+## Índices
+
+Crear y versionar:
+
+firestore.indexes.json
+
+Incluir índices compuestos para:
+
+- orders: internal_status + created_at
+- payments: status + date_approved
+- webhook_events: processing_status + received_at
+- payment_alerts: resolved + severity + created_at
+
+Si durante tests o desarrollo Firestore informa que falta un índice, incorporarlo al archivo.
+
+## Reglas de Firestore
+
+Crear:
+
+firestore.rules
+
+Como el acceso será exclusivamente mediante backend y SDK servidor, bloquear por defecto el acceso directo del frontend.
+
+Ejemplo conceptual:
+
+allow read, write: if false;
+
+Documentar que el SDK servidor usa IAM y no las reglas del cliente para autorizarse.
+
+## Back URLs
+
+Crear:
+
+GET /checkout/success
+GET /checkout/failure
+GET /checkout/pending
+
+Cada endpoint debe:
+
+1. Recibir los query parameters enviados por Mercado Pago.
+2. Leer payment_id.
+3. Consultar el pago real mediante la API de Mercado Pago.
+4. Obtener la orden directamente mediante orders/{external_reference}.
+5. Actualizar el pago y la orden si corresponde.
+6. Reutilizar la misma lógica de validación usada por el webhook.
+7. Renderizar un HTML con Jinja2.
+8. Mostrar ID del pago, estado verificado, detalle, referencia externa, importe, moneda, medio de pago, fecha e ID de la orden.
+9. Indicar claramente si el pago está aprobado, pendiente, rechazado, en revisión o no verificado.
+
+Nunca mostrar “Pago aprobado” basándose únicamente en ?status=approved.
+
+La back URL y el webhook pueden llegar en cualquier orden.
+
+El sistema debe funcionar correctamente si llega:
+
+- webhook antes que back URL;
+- back URL antes que webhook.
+
+## Endpoint de salud
+
+Crear:
+
+GET /health
+
+Respuesta:
+
+{
+  "status": "ok",
+  "service": "mp-checkout-pro-firestore"
+}
+
+No realizar una escritura Firestore en cada healthcheck.
+
+## Endpoints internos de consulta
+
+Crear:
+
+GET /orders/{order_id}
+GET /payments/{payment_id}
+GET /webhooks/{event_key}
+GET /alerts
+
+Son para depuración del MVP.
+
+No exponer datos sensibles.
+
+Agregar paginación a listados.
+
+## Firestore Emulator
+
+Configurar Firebase Emulator Suite.
+
+Crear:
+
+firebase.json
+.firebaserc.example
+
+El emulador de Firestore debe usar preferentemente:
+
+127.0.0.1:8080
+
+Agregar scripts para:
+
+firebase emulators:start
+
+y:
+
+export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+export GOOGLE_CLOUD_PROJECT=mp-checkout-pro-test
+pytest -v
+
+Los tests automatizados deben fallar explícitamente si intentan conectarse al Firestore real.
+
+Implementar protección en tests/conftest.py que verifique FIRESTORE_EMULATOR_HOST antes de ejecutar pruebas que escriban datos.
+
+## Tests
+
+Crear pruebas con pytest.
+
+Mockear llamadas externas a Mercado Pago.
+
+Usar Firestore Emulator para persistencia.
+
+Cubrir al menos:
+
+1. /health.
+2. Creación de una orden.
+3. Persistencia de la orden en Firestore.
+4. Creación de preferencia con Mercado Pago simulado.
+5. Error al crear preferencia.
+6. Actualización de orden con error.
+7. Webhook con firma inválida.
+8. Webhook válido.
+9. Webhook duplicado.
+10. Dos webhooks simultáneos para el mismo evento.
+11. Creación y actualización de pago.
+12. Pago aprobado.
+13. Pago pendiente.
+14. Pago rechazado.
+15. Pago reembolsado.
+16. Diferencia de importe.
+17. Diferencia de moneda.
+18. Orden inexistente.
+19. Pago sin external_reference.
+20. Transición inválida.
+21. Back URL sin payment_id.
+22. Webhook antes de back URL.
+23. Back URL antes de webhook.
+24. Idempotencia de alertas.
+25. Transacción atómica.
+26. Rollback lógico cuando una validación falla.
+27. Conversión correcta entre Decimal y unidades mínimas.
+
+No realizar pagos reales durante tests automatizados.
+
+## Logging
+
+Configurar logging con logging.
+
+Registrar:
+
+- creación de órdenes;
+- creación de preferencias;
+- recepción de webhooks;
+- eventos duplicados;
+- firmas inválidas;
+- cambios de estado;
+- errores de API;
+- diferencias de importe;
+- diferencias de moneda;
+- alertas;
+- errores Firestore;
+- transacciones reintentadas o fallidas.
+
+No registrar:
+
+- Access Token;
+- secreto de webhook;
+- credenciales Google;
+- headers Authorization;
+- información sensible completa.
+
+Usar identificadores útiles:
+
+order_id
+payment_id
+event_key
+request_id
+
+## Scripts
+
+Crear:
+
+scripts/run_local.sh
+scripts/run_emulators.sh
+scripts/test_checkout.sh
+scripts/test_webhook.sh
+
+run_local.sh debe ejecutar:
+
+uvicorn app.main:app --reload
+
+run_emulators.sh debe iniciar Firebase Emulator Suite.
+
+Agregar ejemplos curl para health, crear preferencia, consultar una orden, consultar un pago, simular webhook sin firma y listar alertas.
+
+## README
+
+El README debe incluir:
+
+1. Objetivo.
+2. Arquitectura.
+3. Flujo completo de Checkout Pro.
+4. Estructura Firestore.
+5. Colecciones y documentos.
+6. IDs determinísticos.
+7. Idempotencia.
+8. Transacciones.
+9. Requisitos.
+10. Instalación.
+11. Entorno virtual.
+12. Dependencias.
+13. Variables de entorno.
+14. Configuración de Google Cloud.
+15. Creación de Firestore Native Mode.
+16. Application Default Credentials.
+17. Uso de Service Accounts.
+18. Firestore Emulator.
+19. Ejecución local.
+20. Ejecución del HTML.
+21. Configuración de Mercado Pago.
+22. Configuración de Webhooks.
+23. Configuración de back URLs.
+24. Usuarios y tarjetas de prueba.
+25. Pruebas automatizadas.
+26. Deploy en FastAPI Cloud.
+27. Gestión segura de credenciales.
+28. Índices de Firestore.
+29. Reglas de seguridad.
+30. Problemas frecuentes.
+31. Diferencia entre webhook y back URL.
+32. Próximos pasos.
+33. Preparación para OAuth Partner.
+34. Preparación para reportes financieros.
+
+Agregar comandos concretos para macOS y Linux.
+
+## AGENTS.md
+
+Crear AGENTS.md con reglas para futuras modificaciones:
+
+- mantener tipado;
+- usar Pydantic;
+- mantener routers, servicios y repositorios separados;
+- no usar SQL;
+- no agregar SQLAlchemy;
+- no hardcodear secretos;
+- usar Firestore Emulator para tests;
+- no ejecutar tests contra producción;
+- usar IDs determinísticos;
+- mantener idempotencia;
+- utilizar unidades mínimas para dinero;
+- no usar float para importes;
+- no hacer llamadas HTTP dentro de transacciones;
+- agregar tests a nuevas funcionalidades;
+- consultar siempre el pago real en Mercado Pago;
+- no confiar en datos del frontend;
+- no confiar únicamente en back URLs;
+- no revertir estados sin validación;
+- preservar compatibilidad con FastAPI Cloud;
+- versionar índices;
+- bloquear acceso directo desde frontend a Firestore.
+
+## pyproject.toml
+
+Configurar dependencias de producción, dependencias de desarrollo, pytest, pytest-asyncio, Ruff y Ruff Format.
+
+Agregar comandos sugeridos:
+
+ruff check .
+ruff format .
+pytest -v
+
+Dependencias esperadas:
+
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+pydantic-settings
+jinja2
+google-cloud-firestore
+pytest
+pytest-asyncio
+ruff
+
+Agregar otras dependencias solo si tienen una justificación clara.
+
+## Fases de implementación
+
+Trabajá en este orden (MUY IMPORTANTE !!!):
+
+### Fase 1
+- Inspección del repositorio.
+- Estructura del proyecto.
+- Configuración.
+- Logging.
+- FastAPI.
+- Healthcheck.
+- Cliente Firestore.
+- Configuración del emulador.
+
+### Fase 2
+- Modelos Pydantic.
+- Servicio de dinero.
+- Repositorios Firestore.
+- Modelo de orden.
+- Creación de orden.
+
+### Fase 3
+- Servicio Mercado Pago.
+- Creación de preferencia.
+- Persistencia de preference ID.
+- Manejo de errores.
+
+### Fase 4
+- HTML local.
+- CORS.
+- Redirección a Checkout Pro.
+
+### Fase 5
+- Back URLs.
+- Consulta del pago.
+- Jinja2.
+- Actualización de orden y pago.
+
+### Fase 6
+- Webhook.
+- Validación de firma.
+- Eventos determinísticos.
+- Idempotencia.
+- Transacciones Firestore.
+- Alertas.
+
+### Fase 7
+- Índices.
+- Reglas de seguridad.
+- Firestore Emulator.
+- Tests.
+
+### Fase 8
+- README.
+- Scripts.
+- AGENTS.md.
+- Limpieza.
+- Linting.
+- Ejecución de tests.
+
+## Forma de trabajo
+
+Antes de modificar archivos:
+
+1. Inspeccioná el repositorio actual.
+2. Verificá versiones de Python y dependencias.
+3. Explicá brevemente qué vas a crear o modificar.
+4. No borres archivos existentes sin necesidad.
+5. Si el repositorio está vacío, inicializá toda la estructura.
+6. Realizá los cambios directamente.
+7. No te limites a describir código.
+8. Ejecutá el emulador si está disponible.
+9. Ejecutá tests.
+10. Corregí errores encontrados.
+11. Ejecutá linting.
+12. Mostrá el árbol final.
+13. Resumí qué se implementó, qué falta configurar manualmente, qué variables debo completar, qué credenciales de Google debo configurar, qué URLs debo registrar en Mercado Pago, qué índices necesita Firestore y qué comandos debo ejecutar.
+
+Si Firebase CLI no está instalado, dejá la configuración preparada y explicá el comando necesario, pero continuá con el resto del proyecto.
+
+## Restricciones
+
+- No inventar endpoints de Mercado Pago.
+- No inventar parámetros ni formato de firma.
+- Verificar la documentación oficial actual cuando sea necesario.
+- No exponer credenciales.
+- No usar credenciales reales en tests.
+- No escribir desde tests al proyecto Firestore real.
+- No aprobar órdenes con datos de la back URL solamente.
+- No actualizar pagos usando únicamente el payload del webhook.
+- No usar precios del navegador como fuente definitiva.
+- No usar float para dinero.
+- No hacer llamadas HTTP dentro de transacciones.
+- No usar IDs automáticos donde se requiere idempotencia.
+- No usar SQL.
+- No agregar complejidad innecesaria.
+- No dejar métodos vacíos salvo extensiones futuras claramente documentadas.
+- No utilizar código pseudofuncional.
+- No crear un nuevo cliente Firestore por request.
+- No permitir acceso directo del frontend a Firestore.
+
+## Criterios de aceptación
+
+El proyecto estará completo cuando:
+
+- GET /health responda correctamente.
+- Se pueda crear una orden en Firestore.
+- El ID del documento sea el order_id.
+- external_reference sea igual a order_id.
+- Se pueda crear una preferencia.
+- Se guarden preference_id y URLs de Checkout.
+- El HTML local pueda solicitar una preferencia.
+- El navegador pueda redirigir a Checkout Pro.
+- Las back URLs puedan consultar y mostrar el pago real.
+- El webhook pueda recibir eventos.
+- La firma pueda validarse.
+- El pago pueda consultarse en Mercado Pago.
+- El pago se guarde como payments/{payment_id}.
+- La orden se actualice correctamente.
+- Un webhook repetido no duplique datos.
+- Dos procesamientos simultáneos no dupliquen operaciones.
+- Las escrituras relacionadas sean atómicas.
+- Las diferencias de monto creen alertas.
+- Las diferencias de moneda creen alertas.
+- Las transiciones inválidas no sobrescriban estados válidos.
+- Los tests usen Firestore Emulator.
+- Los tests pasen.
+- Ruff no reporte errores relevantes.
+- Los índices estén versionados.
+- Las reglas bloqueen acceso directo del frontend.
+- El README permita reproducir todo desde cero.
+- El proyecto quede preparado para FastAPI Cloud.
+
+Al finalizar, entregar también:
+
+1. Checklist de configuración manual en Mercado Pago.
+2. Checklist de configuración en Google Cloud.
+3. Checklist de despliegue en FastAPI Cloud.
+4. Comandos exactos para ejecutar el proyecto.
+5. Comandos exactos para ejecutar Firestore Emulator.
+6. Lista de URLs que debo registrar como webhook y back URLs.
+7. Lista de secretos que debo configurar.
+8. Lista de mejoras recomendadas para una segunda versión.
+
+DETENTE AL FINALIZAR CADA FASE PARA QUE YO PUEDA REVIZAR EL AVANCE DEL MPROYECTO. Implementá el proyecto, ejecutá las verificaciones disponibles y dejalo preparado para realizar pagos de prueba.

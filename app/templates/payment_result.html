@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Resultado del pago</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 760px; line-height: 1.5; }
+      dl { display: grid; grid-template-columns: 220px 1fr; gap: .5rem 1rem; }
+      dt { font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <h1>Pago verificado</h1>
+    <p>Resultado de retorno: {{ outcome }}. El estado mostrado fue consultado contra Mercado Pago.</p>
+    <dl>
+      <dt>ID de pago</dt><dd>{{ payment.mercado_pago_payment_id }}</dd>
+      <dt>Estado</dt><dd>{{ payment.status }}</dd>
+      <dt>Detalle</dt><dd>{{ payment.status_detail or "-" }}</dd>
+      <dt>Referencia externa</dt><dd>{{ payment.external_reference or "-" }}</dd>
+      <dt>Orden</dt><dd>{{ payment.order_id or "-" }}</dd>
+      <dt>Importe minor</dt><dd>{{ payment.transaction_amount_minor or "-" }}</dd>
+      <dt>Moneda</dt><dd>{{ payment.currency_id or "-" }}</dd>
+      <dt>Medio de pago</dt><dd>{{ payment.payment_method_id or "-" }}</dd>
+      <dt>Tipo</dt><dd>{{ payment.payment_type_id or "-" }}</dd>
+      <dt>Fecha</dt><dd>{{ payment.date_last_updated or payment.date_created or "-" }}</dd>
+    </dl>
+  </body>
+</html>
+

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout Pro local</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; background: #f7f7f3; color: #1d1d1b; }
+      main { max-width: 640px; margin: 8vh auto; padding: 2rem; background: white; border: 1px solid #ddd; }
+      button { border: 0; background: #009ee3; color: white; padding: .9rem 1.2rem; font-weight: 700; cursor: pointer; }
+      button:disabled { opacity: .55; cursor: wait; }
+      .error { color: #9f1d20; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Producto de prueba</h1>
+      <p>ARS 1.500,00</p>
+      <button id="pay">Pagar con Mercado Pago</button>
+      <p id="status" role="status"></p>
+    </main>
+    <script>
+      const API_BASE_URL = "https://mi-app.fastapicloud.com";
+      const button = document.querySelector("#pay");
+      const statusEl = document.querySelector("#status");
+
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        statusEl.className = "";
+        statusEl.textContent = "Creando preferencia...";
+        try {
+          const response = await fetch(`${API_BASE_URL}/checkout/preference`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_code: "test-product", quantity: 1 })
+          });
+          if (!response.ok) {
+            throw new Error(`Error ${response.status}`);
+          }
+          const data = await response.json();
+          statusEl.textContent = "Redirigiendo a Mercado Pago...";
+          window.location.assign(data.checkout_url);
+        } catch (error) {
+          statusEl.className = "error";
+          statusEl.textContent = "No se pudo iniciar el pago. Revisá la URL pública de FastAPI.";
+          button.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
+

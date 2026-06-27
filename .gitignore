@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.pyc
+*.log
+*.egg-info/
+service-account*.json
+firebase-debug.log
+firestore-debug.log
