@@ -63,9 +63,7 @@ Nunca commitear tokens, secretos ni JSON de service account.
 Variables mínimas:
 
 - `MP_ACCESS_TOKEN`
-- `MP_PUBLIC_KEY`
 - `MP_WEBHOOK_SECRET`
-- `BASE_URL`
 - `MP_SUCCESS_URL`
 - `MP_FAILURE_URL`
 - `MP_PENDING_URL`
@@ -147,9 +145,9 @@ curl http://localhost:8000/alerts
 ## Tests y Calidad
 
 ```bash
-ruff check .
-ruff format .
-pytest -v
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format .
+.venv/bin/python -m pytest -v
 ```
 
 Los tests que escriban Firestore deben exigir `FIRESTORE_EMULATOR_HOST`. Las pruebas incluidas mockean Mercado Pago y cubren salud, dinero, creación de preferencia, error de preferencia, webhooks, duplicados, alertas e invalidación de transiciones.
@@ -171,10 +169,9 @@ Configurar las variables de entorno en FastAPI Cloud y apuntar Mercado Pago al d
 
 - `401` en webhook: revisar `MP_WEBHOOK_SECRET`, `x-signature`, `x-request-id` y `data.id`.
 - No aparece la orden: verificar `GOOGLE_CLOUD_PROJECT` y si se está usando emulador.
-- Checkout no inicia: revisar CORS y que `static/checkout.html` apunte a `BASE_URL` público.
+- Checkout no inicia: revisar CORS y el `API_BASE_URL` de `static/checkout.html`.
 - Resultado aprobado incorrecto: recordar que la UI solo debe creer en el pago verificado por API.
 
-## Próximos Pasos
-
-La estructura deja puntos claros para incorporar OAuth Partner, múltiples vendedores, reportes financieros, movimientos de billetera, Google Sheets, Looker Studio, Cloud Tasks, Pub/Sub y automatizaciones sin mezclar responsabilidades.
-
+El alcance es intencionalmente pequeño: un producto de prueba, una API y Firestore. La
+separación por capas se mantiene porque ayuda a probar el flujo de pagos sin agregar
+infraestructura pensada para una escala que este proyecto no necesita.

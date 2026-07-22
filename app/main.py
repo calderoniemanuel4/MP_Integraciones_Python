@@ -13,16 +13,10 @@ from app.routers import checkout, health, orders, payments, returns, webhooks
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    
-        # Se ejecuta al iniciar la aplicación
     configure_logging()
-        # Creamos un único cliente Firestore para toda la app
     app.state.firestore_client = create_firestore_client(get_settings())
-        # FastAPI queda funcionando acá
     yield
-        # Se ejecuta cuando la aplicación se apaga
     close_result = app.state.firestore_client.close()
-        # Si el cierre es asíncrono, lo esperamos
     if isawaitable(close_result):
         await close_result
 

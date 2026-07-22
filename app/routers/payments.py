@@ -2,22 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException
 from google.cloud.firestore_v1.async_client import AsyncClient
 
 from app.dependencies import firestore_client_dep
+from app.models.payment import Payment
 from app.repositories.alert_repository import PaymentAlertRepository
 from app.repositories.payment_repository import PaymentRepository
-from app.schemas.payment import PaymentResponse
 
 router = APIRouter(tags=["payments"])
 
 
-@router.get("/payments/{payment_id}", response_model=PaymentResponse)
+@router.get("/payments/{payment_id}", response_model=Payment)
 async def get_payment(
     payment_id: str,
     client: AsyncClient = Depends(firestore_client_dep),
-) -> PaymentResponse:
+) -> Payment:
     payment = await PaymentRepository(client).get(payment_id)
     if payment is None:
         raise HTTPException(status_code=404, detail="Payment not found")
-    return PaymentResponse(**payment.model_dump())
+    return payment
 
 
 @router.get("/alerts")

@@ -51,20 +51,20 @@ class OrderService:
             ],
             "external_reference": order_id,
             "back_urls": {
-                "success": str(self.settings.mp_success_url),
-                "failure": str(self.settings.mp_failure_url),
-                "pending": str(self.settings.mp_pending_url),
+                "success": self.settings.mp_success_url,
+                "failure": self.settings.mp_failure_url,
+                "pending": self.settings.mp_pending_url,
             },
             "auto_return": "approved",
-            "notification_url": str(self.settings.mp_webhook_url),
+            "notification_url": self.settings.mp_webhook_url,
             "metadata": {"order_id": order_id},
         }
         try:
             preference = await self.mercado_pago_service.create_preference(payload)
-        except MercadoPagoAPIError as exc:
+        except MercadoPagoAPIError:
             await self.order_repository.update(order_id, {"internal_status": "error"})
             logger.exception("Preference creation failed order_id=%s", order_id)
-            raise exc
+            raise
         checkout_url = preference.get("init_point") or preference.get("sandbox_init_point")
         await self.order_repository.update(
             order_id,

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import AnyHttpUrl, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,19 +16,17 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     mp_access_token: str = Field(default="", validation_alias="MP_ACCESS_TOKEN")
-    mp_public_key: str = Field(default="", validation_alias="MP_PUBLIC_KEY")
     mp_webhook_secret: str = Field(default="", validation_alias="MP_WEBHOOK_SECRET")
-    base_url: AnyHttpUrl | str = Field(default="http://localhost:8000", validation_alias="BASE_URL")
-    mp_success_url: AnyHttpUrl | str = Field(
+    mp_success_url: str = Field(
         default="http://localhost:8000/checkout/success", validation_alias="MP_SUCCESS_URL"
     )
-    mp_failure_url: AnyHttpUrl | str = Field(
+    mp_failure_url: str = Field(
         default="http://localhost:8000/checkout/failure", validation_alias="MP_FAILURE_URL"
     )
-    mp_pending_url: AnyHttpUrl | str = Field(
+    mp_pending_url: str = Field(
         default="http://localhost:8000/checkout/pending", validation_alias="MP_PENDING_URL"
     )
-    mp_webhook_url: AnyHttpUrl | str = Field(
+    mp_webhook_url: str = Field(
         default="http://localhost:8000/webhooks/mercadopago", validation_alias="MP_WEBHOOK_URL"
     )
     google_cloud_project: str = Field(
@@ -36,10 +34,6 @@ class Settings(BaseSettings):
     )
     local_frontend_origin: str = Field(
         default="http://localhost:5500", validation_alias="LOCAL_FRONTEND_ORIGIN"
-    )
-    use_firestore_emulator: bool = Field(default=False, validation_alias="USE_FIRESTORE_EMULATOR")
-    firestore_emulator_host: str | None = Field(
-        default=None, validation_alias="FIRESTORE_EMULATOR_HOST"
     )
     mp_api_base_url: str = "https://api.mercadopago.com"
     request_timeout_seconds: float = 10.0

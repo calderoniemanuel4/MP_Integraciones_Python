@@ -2,6 +2,7 @@ import pytest
 
 from app.models.order import Order
 from app.services.payment_service import PaymentService
+from app.services.state_machine import can_transition
 from tests.conftest import MemoryAlertRepository, MemoryOrderRepository, MemoryPaymentRepository
 
 
@@ -22,6 +23,12 @@ async def make_service(status: str = "preference_created"):
     payments = MemoryPaymentRepository()
     alerts = MemoryAlertRepository()
     return PaymentService(orders, payments, alerts), orders, payments, alerts
+
+
+def test_transition_rules() -> None:
+    assert can_transition("preference_created", "approved")
+    assert can_transition("pending", "approved")
+    assert not can_transition("approved", "pending")
 
 
 @pytest.mark.asyncio

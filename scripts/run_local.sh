@@ -1,4 +1,3 @@
 #!/usr/bin/env bash
 set -euo pipefail
-uvicorn app.main:app --reload
-
+.venv/bin/python -m uvicorn app.main:app --reload

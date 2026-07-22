@@ -14,10 +14,6 @@ from app.services.payment_service import PaymentService
 from app.services.webhook_service import WebhookService
 
 
-def settings_dep() -> Settings:
-    return get_settings()
-
-
 def firestore_client_dep(request: Request) -> AsyncClient:
     return request.app.state.firestore_client
 
@@ -55,7 +51,7 @@ def webhook_repository_dep(
 def order_service_dep(
     order_repository: OrderRepository = Depends(order_repository_dep),
     mercado_pago_service: MercadoPagoService = Depends(mercado_pago_service_dep),
-    settings: Settings = Depends(settings_dep),
+    settings: Settings = Depends(get_settings),
 ) -> OrderService:
     return OrderService(order_repository, mercado_pago_service, settings)
 
