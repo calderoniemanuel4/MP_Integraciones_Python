@@ -18,8 +18,18 @@ from tests.conftest import (
 )
 
 
-def signature(secret: str, data_id: str, request_id: str, ts: str = "1") -> str:
-    manifest = f"id:{data_id};request-id:{request_id};ts:{ts};"
+def signature(
+    secret: str,
+    data_id: str | None,
+    request_id: str | None,
+    ts: str = "1",
+) -> str:
+    manifest = ""
+    if data_id:
+        manifest += f"id:{data_id};"
+    if request_id:
+        manifest += f"request-id:{request_id};"
+    manifest += f"ts:{ts};"
     digest = hmac.new(secret.encode(), manifest.encode(), sha256).hexdigest()
     return f"ts={ts},v1={digest}"
 
@@ -34,6 +44,37 @@ async def test_invalid_webhook_signature() -> None:
     )
     with pytest.raises(InvalidWebhookSignature):
         service.validate_signature(x_signature="ts=1,v1=bad", x_request_id="req", data_id="123")
+
+
+def test_signature_accepts_whitespace_and_normalizes_alphanumeric_id() -> None:
+    service = WebhookService(
+        Settings(mp_webhook_secret="secret"),
+        MemoryWebhookRepository(),
+        FakeMP(),
+        PaymentService(MemoryOrderRepository(), MemoryPaymentRepository(), MemoryAlertRepository()),
+    )
+    signed = signature("secret", "abc123", "req").replace(",", ", ")
+
+    service.validate_signature(
+        x_signature=signed,
+        x_request_id="req",
+        data_id="ABC123",
+    )
+
+
+def test_signature_omits_components_missing_from_request() -> None:
+    service = WebhookService(
+        Settings(mp_webhook_secret="secret"),
+        MemoryWebhookRepository(),
+        FakeMP(),
+        PaymentService(MemoryOrderRepository(), MemoryPaymentRepository(), MemoryAlertRepository()),
+    )
+
+    service.validate_signature(
+        x_signature=signature("secret", None, None),
+        x_request_id=None,
+        data_id=None,
+    )
 
 
 @pytest.mark.asyncio

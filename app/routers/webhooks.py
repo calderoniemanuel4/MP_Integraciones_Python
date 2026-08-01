@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
 from app.dependencies import webhook_repository_dep, webhook_service_dep
@@ -5,6 +7,7 @@ from app.repositories.webhook_repository import WebhookEventRepository
 from app.services.webhook_service import InvalidWebhookSignature, WebhookService
 
 router = APIRouter(tags=["webhooks"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/webhooks/mercadopago")
@@ -23,6 +26,14 @@ async def mercado_pago_webhook(
             query_data_id=request.query_params.get("data.id"),
         )
     except InvalidWebhookSignature as exc:
+        logger.warning(
+            "Mercado Pago webhook rejected reason=%s signature_present=%s "
+            "request_id_present=%s query_data_id_present=%s",
+            exc,
+            bool(x_signature),
+            bool(x_request_id),
+            bool(request.query_params.get("data.id")),
+        )
         raise HTTPException(status_code=401, detail="Invalid Mercado Pago signature") from exc
     return {"status": "ok", "event_key": event_key}
 

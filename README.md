@@ -69,6 +69,7 @@ Variables mínimas:
 - `MP_PENDING_URL`
 - `MP_WEBHOOK_URL`
 - `GOOGLE_CLOUD_PROJECT`
+- `GOOGLE_SERVICE_ACCOUNT_JSON` en FastAPI Cloud
 - `LOCAL_FRONTEND_ORIGIN`
 - `FIRESTORE_EMULATOR_HOST`
 
@@ -89,7 +90,10 @@ export GOOGLE_CLOUD_PROJECT=mp-checkout-pro-test
 firebase emulators:start --only firestore
 ```
 
-Producción en Google Cloud debe usar Service Account e IAM. Producción fuera de Google Cloud debe inyectar credenciales como secretos del proveedor, no como archivos versionados.
+En FastAPI Cloud, guardar el contenido completo del JSON como el secreto
+`GOOGLE_SERVICE_ACCOUNT_JSON`. La aplicación lo convierte en credenciales en memoria y no
+crea archivos. Para desarrollo local se puede seguir usando `GOOGLE_APPLICATION_CREDENTIALS`
+con una ruta absoluta a un archivo fuera de Git.
 
 ## Instalación
 
@@ -160,7 +164,10 @@ Los tests que escriban Firestore deben exigir `FIRESTORE_EMULATOR_HOST`. Las pru
 
 ## Deploy en FastAPI Cloud
 
-Configurar las variables de entorno en FastAPI Cloud y apuntar Mercado Pago al dominio público. No subir `.env` ni credenciales JSON. El webhook requiere HTTPS público para recibir notificaciones reales.
+Configurar `GOOGLE_SERVICE_ACCOUNT_JSON`, `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET` como
+secretos en FastAPI Cloud. Agregar el resto de las variables como configuración normal y no
+definir `FIRESTORE_EMULATOR_HOST` en producción. No subir `.env` ni archivos JSON. Después del
+primer deploy, usar el dominio HTTPS asignado para las back URLs y el webhook de Mercado Pago.
 
 ## Problemas Frecuentes
 

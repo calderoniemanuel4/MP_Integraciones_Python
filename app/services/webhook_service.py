@@ -43,18 +43,32 @@ class WebhookService:
         and sends x-signature values such as ts=...,v1=....
         """
 
-        if not self.settings.mp_webhook_secret:
+        secret = self.settings.mp_webhook_secret.strip()
+        if not secret:
             raise InvalidWebhookSignature("Webhook secret is not configured")
-        if not x_signature or not x_request_id or not data_id:
-            raise InvalidWebhookSignature("Missing signature inputs")
-        parts = dict(item.split("=", 1) for item in x_signature.split(",") if "=" in item)
+        if not x_signature:
+            raise InvalidWebhookSignature("Missing x-signature header")
+        parts = {
+            key.strip(): value.strip()
+            for item in x_signature.split(",")
+            if "=" in item
+            for key, value in [item.split("=", 1)]
+        }
         ts = parts.get("ts")
         received_hash = parts.get("v1")
         if not ts or not received_hash:
             raise InvalidWebhookSignature("Malformed signature header")
-        manifest = f"id:{data_id};request-id:{x_request_id};ts:{ts};"
+
+        manifest_parts = []
+        if data_id:
+            normalized_data_id = data_id.lower() if data_id.isalnum() else data_id
+            manifest_parts.append(f"id:{normalized_data_id};")
+        if x_request_id:
+            manifest_parts.append(f"request-id:{x_request_id};")
+        manifest_parts.append(f"ts:{ts};")
+        manifest = "".join(manifest_parts)
         expected_hash = hmac.new(
-            self.settings.mp_webhook_secret.encode(),
+            secret.encode(),
             manifest.encode(),
             sha256,
         ).hexdigest()
@@ -73,7 +87,7 @@ class WebhookService:
         self.validate_signature(
             x_signature=x_signature,
             x_request_id=x_request_id,
-            data_id=resource_id,
+            data_id=query_data_id,
         )
         event_key = build_event_key(
             str(payload.get("id") or x_request_id), payload.get("action"), resource_id

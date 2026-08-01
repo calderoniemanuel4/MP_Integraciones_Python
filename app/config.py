@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     )
     google_cloud_project: str = Field(
         default="mp-checkout-pro-test", validation_alias="GOOGLE_CLOUD_PROJECT"
+    )
+    google_service_account_json: SecretStr | None = Field(
+        default=None,
+        validation_alias="GOOGLE_SERVICE_ACCOUNT_JSON",
     )
     local_frontend_origin: str = Field(
         default="http://localhost:5500", validation_alias="LOCAL_FRONTEND_ORIGIN"
