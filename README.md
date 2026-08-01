@@ -6,8 +6,8 @@ Proyecto funcional de prueba para integrar Mercado Pago Checkout Pro usando Pyth
 
 Flujo principal:
 
-1. `static/checkout.html` corre localmente en `http://localhost:5500`.
-2. El HTML llama a `POST /checkout/preference` en la API pública.
+1. FastAPI sirve `static/checkout.html` en `http://localhost:8000`.
+2. El HTML llama a `POST /checkout/preference` en la misma API.
 3. FastAPI crea `orders/{order_id}` en Firestore.
 4. FastAPI crea una preferencia en Mercado Pago.
 5. El comprador es redirigido a Checkout Pro.
@@ -110,13 +110,10 @@ API:
 ./scripts/run_local.sh
 ```
 
-HTML local:
-
-```bash
-python -m http.server 5500 --directory static
-```
-
-Editar `API_BASE_URL` en `static/checkout.html` para apuntar a tu dominio público de FastAPI Cloud.
+Abrir `http://localhost:8000`. FastAPI sirve el checkout y la API desde el mismo origen,
+por lo que no hace falta levantar otro servidor ni editar `API_BASE_URL`. El script carga
+automáticamente las variables de `.env`; si no existe, usa el emulador en
+`127.0.0.1:8080` y el proyecto `mp-checkout-pro-test` como valores locales.
 
 ## Mercado Pago
 
@@ -169,7 +166,7 @@ Configurar las variables de entorno en FastAPI Cloud y apuntar Mercado Pago al d
 
 - `401` en webhook: revisar `MP_WEBHOOK_SECRET`, `x-signature`, `x-request-id` y `data.id`.
 - No aparece la orden: verificar `GOOGLE_CLOUD_PROJECT` y si se está usando emulador.
-- Checkout no inicia: revisar CORS y el `API_BASE_URL` de `static/checkout.html`.
+- Checkout no inicia: revisar `MP_ACCESS_TOKEN`, Firestore y los logs de la API.
 - Resultado aprobado incorrecto: recordar que la UI solo debe creer en el pago verificado por API.
 
 El alcance es intencionalmente pequeño: un producto de prueba, una API y Firestore. La
