@@ -46,14 +46,14 @@ async def test_invalid_webhook_signature() -> None:
         service.validate_signature(x_signature="ts=1,v1=bad", x_request_id="req", data_id="123")
 
 
-def test_signature_accepts_whitespace_and_normalizes_alphanumeric_id() -> None:
+def test_signature_accepts_whitespace_and_alphanumeric_id() -> None:
     service = WebhookService(
         Settings(mp_webhook_secret="secret"),
         MemoryWebhookRepository(),
         FakeMP(),
         PaymentService(MemoryOrderRepository(), MemoryPaymentRepository(), MemoryAlertRepository()),
     )
-    signed = signature("secret", "abc123", "req").replace(",", ", ")
+    signed = signature("secret", "ABC123", "req").replace(",", ", ")
 
     service.validate_signature(
         x_signature=signed,

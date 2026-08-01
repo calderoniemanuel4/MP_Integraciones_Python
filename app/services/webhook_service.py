@@ -1,7 +1,10 @@
-import hmac
 import logging
-from hashlib import sha256
 from typing import Any
+
+from mercadopago.webhook import (
+    InvalidWebhookSignatureError as MercadoPagoInvalidWebhookSignature,
+)
+from mercadopago.webhook import WebhookSignatureValidator
 
 from app.config import Settings
 from app.models.webhook_event import WebhookEvent
@@ -48,32 +51,15 @@ class WebhookService:
             raise InvalidWebhookSignature("Webhook secret is not configured")
         if not x_signature:
             raise InvalidWebhookSignature("Missing x-signature header")
-        parts = {
-            key.strip(): value.strip()
-            for item in x_signature.split(",")
-            if "=" in item
-            for key, value in [item.split("=", 1)]
-        }
-        ts = parts.get("ts")
-        received_hash = parts.get("v1")
-        if not ts or not received_hash:
-            raise InvalidWebhookSignature("Malformed signature header")
-
-        manifest_parts = []
-        if data_id:
-            normalized_data_id = data_id.lower() if data_id.isalnum() else data_id
-            manifest_parts.append(f"id:{normalized_data_id};")
-        if x_request_id:
-            manifest_parts.append(f"request-id:{x_request_id};")
-        manifest_parts.append(f"ts:{ts};")
-        manifest = "".join(manifest_parts)
-        expected_hash = hmac.new(
-            secret.encode(),
-            manifest.encode(),
-            sha256,
-        ).hexdigest()
-        if not hmac.compare_digest(expected_hash, received_hash):
-            raise InvalidWebhookSignature("Invalid webhook signature")
+        try:
+            WebhookSignatureValidator.validate(
+                x_signature,
+                x_request_id,
+                data_id,
+                secret,
+            )
+        except MercadoPagoInvalidWebhookSignature as exc:
+            raise InvalidWebhookSignature(str(exc)) from exc
 
     async def process_webhook(
         self,
