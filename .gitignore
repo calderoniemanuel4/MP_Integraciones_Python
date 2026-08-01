@@ -7,6 +7,6 @@ __pycache__/
 *.pyc
 *.log
 *.egg-info/
-service-account*.json
+*[Ss]ervice*[Aa]ccount*.json
 firebase-debug.log
 firestore-debug.log
