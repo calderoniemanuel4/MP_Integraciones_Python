@@ -7,3 +7,12 @@ amount = Decimal(1500)
 amount = Decimal(1500)
 scale =2
 print((Decimal(amount) / (Decimal(10) ** scale)))#.quantize(Decimal(10) ** -scale))
+
+"""
+comprador
+TESTUSER1390167848358775668
+xtpqnufUcK
+vendedor
+TESTUSER5924716395395326701
+LWeiGLVwJs
+"""
