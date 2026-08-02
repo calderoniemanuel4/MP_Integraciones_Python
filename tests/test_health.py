@@ -17,6 +17,15 @@ def test_frontend_is_served_by_the_api() -> None:
     assert response.status_code == 200
     assert "Producto de prueba" in response.text
     assert "window.location.origin" in response.text
+    assert "/static/product-speaker.jpg" in response.text
+
+
+def test_checkout_product_image_is_served() -> None:
+    with TestClient(app) as client:
+        response = client.get("/static/product-speaker.jpg")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/jpeg"
 
 
 def test_webhook_rejects_malformed_json_as_bad_request() -> None:

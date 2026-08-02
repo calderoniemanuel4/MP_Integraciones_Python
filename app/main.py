@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.firestore.client import create_firestore_client
@@ -26,6 +27,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title="MP Checkout Pro Firestore", version="0.1.0", lifespan=lifespan)
 settings = get_settings()
 checkout_page = Path(__file__).resolve().parent.parent / "static" / "checkout.html"
+static_dir = checkout_page.parent
+
+app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 
 @app.get("/", include_in_schema=False)
