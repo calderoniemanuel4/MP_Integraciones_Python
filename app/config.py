@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,6 +18,10 @@ class Settings(BaseSettings):
     environment: str = "development"
     mp_access_token: str = Field(default="", validation_alias="MP_ACCESS_TOKEN")
     mp_webhook_secret: str = Field(default="", validation_alias="MP_WEBHOOK_SECRET")
+    mp_checkout_mode: Literal["sandbox", "production"] = Field(
+        default="production",
+        validation_alias="MP_CHECKOUT_MODE",
+    )
     mp_success_url: str = Field(
         default="http://localhost:8000/checkout/success", validation_alias="MP_SUCCESS_URL"
     )

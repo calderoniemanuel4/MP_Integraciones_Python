@@ -22,4 +22,3 @@ class WebhookEvent(BaseModel):
     processing_started_at: datetime | None = None
     processed_at: datetime | None = None
     updated_at: datetime | None = None
-

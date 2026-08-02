@@ -65,7 +65,17 @@ class OrderService:
             await self.order_repository.update(order_id, {"internal_status": "error"})
             logger.exception("Preference creation failed order_id=%s", order_id)
             raise
-        checkout_url = preference.get("init_point") or preference.get("sandbox_init_point")
+        checkout_url_key = (
+            "sandbox_init_point"
+            if self.settings.mp_checkout_mode == "sandbox"
+            else "init_point"
+        )
+        checkout_url = preference.get(checkout_url_key)
+        if not checkout_url:
+            await self.order_repository.update(order_id, {"internal_status": "error"})
+            raise MercadoPagoAPIError(
+                f"Mercado Pago response missing {checkout_url_key}"
+            )
         await self.order_repository.update(
             order_id,
             {

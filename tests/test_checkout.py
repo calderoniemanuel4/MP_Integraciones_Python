@@ -18,9 +18,30 @@ async def test_create_order_and_preference() -> None:
     result = await service.create_checkout_preference(CheckoutPreferenceRequest())
     order = await repo.get(result.order_id)
     assert result.preference_id == "pref_123"
+    assert result.checkout_url.startswith("https://www.mercadopago.com/")
     assert order.external_reference == result.order_id
     assert order.internal_status == "preference_created"
     assert order.total_amount_minor == 150000
+
+
+@pytest.mark.asyncio
+async def test_sandbox_mode_returns_sandbox_checkout_url() -> None:
+    repo = MemoryOrderRepository()
+    service = OrderService(
+        repo,
+        FakeMP(),
+        Settings(
+            mp_access_token="token",
+            mp_webhook_secret="secret",
+            mp_checkout_mode="sandbox",
+        ),
+    )
+
+    result = await service.create_checkout_preference(CheckoutPreferenceRequest())
+
+    assert result.checkout_url.startswith("https://sandbox.mercadopago.com/")
+    order = await repo.get(result.order_id)
+    assert order.checkout_url == result.checkout_url
 
 
 @pytest.mark.asyncio

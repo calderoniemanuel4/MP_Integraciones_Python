@@ -1,4 +1,5 @@
 import logging
+from json import JSONDecodeError
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
 
@@ -15,23 +16,35 @@ async def mercado_pago_webhook(
     request: Request,
     x_signature: str | None = Header(default=None),
     x_request_id: str | None = Header(default=None),
+    x_mp_signature_request_id: str | None = Header(
+        default=None,
+        alias="x-mp-signature-request-id",
+    ),
     service: WebhookService = Depends(webhook_service_dep),
 ) -> dict[str, str]:
-    payload = await request.json()
+    try:
+        payload = await request.json()
+    except (JSONDecodeError, UnicodeDecodeError) as exc:
+        raise HTTPException(status_code=400, detail="Malformed JSON payload") from exc
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=400, detail="Webhook payload must be a JSON object")
     try:
         event_key = await service.process_webhook(
             payload=payload,
             x_signature=x_signature,
-            x_request_id=x_request_id,
+            x_request_id=x_mp_signature_request_id or x_request_id,
             query_data_id=request.query_params.get("data.id"),
         )
     except InvalidWebhookSignature as exc:
         logger.warning(
             "Mercado Pago webhook rejected reason=%s signature_present=%s "
-            "request_id_present=%s query_data_id_present=%s",
+            "request_id=%r request_id_values=%r signature_length=%d "
+            "query_data_id_present=%s",
             exc,
             bool(x_signature),
-            bool(x_request_id),
+            x_request_id,
+            request.headers.getlist("x-request-id"),
+            len(x_signature or ""),
             bool(request.query_params.get("data.id")),
         )
         raise HTTPException(status_code=401, detail="Invalid Mercado Pago signature") from exc
