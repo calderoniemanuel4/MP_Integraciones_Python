@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.dependencies import mercado_pago_service_dep, payment_service_dep
 from app.services.mercado_pago_service import MercadoPagoAPIError, MercadoPagoService
+from app.services.money_service import MoneyService
 from app.services.payment_service import PaymentService
 
 router = APIRouter(prefix="/checkout", tags=["returns"])
@@ -40,6 +41,13 @@ async def render_result(
             },
             status_code=502,
         )
+    display_amount = "-"
+    if payment.transaction_amount_minor is not None and payment.currency_id:
+        amount = MoneyService.from_minor_units(
+            payment.transaction_amount_minor,
+            payment.currency_id,
+        )
+        display_amount = f"{payment.currency_id} {amount}"
     return templates.TemplateResponse(
         request,
         "payment_result.html",
@@ -48,6 +56,7 @@ async def render_result(
             "outcome": outcome,
             "payment": payment,
             "verified": True,
+            "display_amount": display_amount,
         },
     )
 

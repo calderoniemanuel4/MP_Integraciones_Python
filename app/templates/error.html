@@ -3,12 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Error de verificación</title>
-    <style>body { font-family: system-ui, sans-serif; margin: 3rem auto; max-width: 720px; }</style>
+    <meta name="description" content="Error de verificación del pago">
+    <title>Error de verificación · Tienda demo</title>
+    <link rel="stylesheet" href="/static/checkout-result.css">
   </head>
   <body>
-    <h1>No se pudo verificar el pago</h1>
-    <p>{{ message }}</p>
+    <header class="site-header">
+      <p class="wordmark">Tienda demo</p>
+      <p class="header-note">Checkout Pro · Mercado Pago</p>
+    </header>
+    <main class="error-shell">
+      <p class="receipt-kicker">Verificación incompleta</p>
+      <h1>No se pudo verificar el pago</h1>
+      <p class="error-message">{{ message }}</p>
+      <a class="back-link" href="/">Volver a la tienda</a>
+    </main>
   </body>
 </html>
-
