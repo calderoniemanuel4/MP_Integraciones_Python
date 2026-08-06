@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class CheckoutPreferenceRequest(BaseModel):
-    product_code: Literal["1001"] = "1001"
+    product_code: str = "1001"
     quantity: Literal[1] = 1
 
 

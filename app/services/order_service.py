@@ -26,7 +26,7 @@ class OrderService:
     async def create_checkout_preference(
         self, request: CheckoutPreferenceRequest
     ) -> CheckoutPreferenceResponse:
-        quote = self._quote_product(request.product_code)
+        quote = self._quote_product()
         order_id = str(uuid4())
         unit_price_minor = MoneyService.to_minor_units(quote.unit_price, quote.currency_id)
         total_amount_minor = unit_price_minor * request.quantity
@@ -97,10 +97,10 @@ class OrderService:
             sandbox_checkout_url=preference.get("sandbox_init_point"),
         )
 
-    def _quote_product(self, product_code: str) -> ProductQuote:
+    def _quote_product(self) -> ProductQuote:
         # Price is intentionally determined server-side. Browser values are ignored.
         return ProductQuote(
-            product_id=product_code,
+            product_id="1001",
             title="Tienda Móvil",
             description="Dispositivo de tienda móvil de comercio electrónico",
             picture_url=(

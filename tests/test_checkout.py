@@ -61,6 +61,24 @@ async def test_sandbox_mode_returns_sandbox_checkout_url() -> None:
 
 
 @pytest.mark.asyncio
+async def test_legacy_product_code_uses_current_catalog_product() -> None:
+    repo = MemoryOrderRepository()
+    mercado_pago = FakeMP()
+    service = OrderService(
+        repo,
+        mercado_pago,
+        Settings(mp_access_token="token", mp_webhook_secret="secret"),
+    )
+
+    await service.create_checkout_preference(
+        CheckoutPreferenceRequest(product_code="test-product")
+    )
+
+    assert mercado_pago.preference_payload is not None
+    assert mercado_pago.preference_payload["items"][0]["id"] == "1001"
+
+
+@pytest.mark.asyncio
 async def test_preference_error_marks_order_error() -> None:
     repo = MemoryOrderRepository()
     service = OrderService(
