@@ -15,7 +15,7 @@ def test_frontend_is_served_by_the_api() -> None:
     with TestClient(app) as client:
         response = client.get("/")
     assert response.status_code == 200
-    assert "Producto de prueba" in response.text
+    assert "Tienda Móvil" in response.text
     assert "window.location.origin" in response.text
     assert "/static/product-speaker.jpg" in response.text
 

@@ -294,13 +294,13 @@
         <p class="image-caption">Edición demo · Blanco mate</p>
       </section>
       <section class="checkout-panel">
-        <p class="eyebrow">Audio para todos los días</p>
-        <h1>Producto de prueba</h1>
-        <p class="description">Un diseño compacto pensado para acompañar tu espacio sin ocuparlo todo.</p>
+        <p class="eyebrow">Comercio electrónico móvil</p>
+        <h1>Tienda Móvil</h1>
+        <p class="description">Dispositivo de tienda móvil de comercio electrónico</p>
         <p class="unit-price">ARS 1.500,00 <small>por unidad</small></p>
         <div class="field">
           <label for="quantity">Cantidad</label>
-          <input id="quantity" type="number" value="1" min="1" max="10" inputmode="numeric">
+          <input id="quantity" type="number" value="1" min="1" max="1" inputmode="numeric" readonly>
         </div>
         <p class="total"><span>Total</span><strong id="total">ARS 1.500,00</strong></p>
         <button id="pay">Pagar con Mercado Pago</button>
@@ -321,8 +321,7 @@
       });
 
       function selectedQuantity() {
-        const quantity = Number.parseInt(quantityInput.value, 10);
-        return Math.min(10, Math.max(1, Number.isNaN(quantity) ? 1 : quantity));
+        return 1;
       }
 
       function updateTotal() {
@@ -343,7 +342,7 @@
           const response = await fetch(`${API_BASE_URL}/checkout/preference`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ product_code: "test-product", quantity: selectedQuantity() })
+            body: JSON.stringify({ product_code: "1001", quantity: selectedQuantity() })
           });
           if (!response.ok) {
             throw new Error(`Error ${response.status}`);

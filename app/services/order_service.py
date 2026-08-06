@@ -43,7 +43,10 @@ class OrderService:
         payload = {
             "items": [
                 {
+                    "id": quote.product_id,
                     "title": quote.title,
+                    "description": quote.description,
+                    "picture_url": quote.picture_url,
                     "quantity": request.quantity,
                     "unit_price": float(quote.unit_price),
                     "currency_id": quote.currency_id,
@@ -97,7 +100,12 @@ class OrderService:
     def _quote_product(self, product_code: str) -> ProductQuote:
         # Price is intentionally determined server-side. Browser values are ignored.
         return ProductQuote(
-            title="Producto de prueba",
+            product_id=product_code,
+            title="Tienda Móvil",
+            description="Dispositivo de tienda móvil de comercio electrónico",
+            picture_url=(
+                "https://mp-pagos-api.fastapicloud.dev/static/product-speaker.jpg"
+            ),
             unit_price=Decimal("1500.00"),
             currency_id="ARS",
         )

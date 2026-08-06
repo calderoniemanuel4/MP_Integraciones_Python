@@ -79,8 +79,10 @@ class FakeMP:
     ) -> None:
         self.payment = payment
         self.preference_error = preference_error
+        self.preference_payload: dict | None = None
 
     async def create_preference(self, payload: dict) -> dict:
+        self.preference_payload = payload
         if self.preference_error:
             raise self.preference_error
         return {

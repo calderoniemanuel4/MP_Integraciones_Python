@@ -1,11 +1,12 @@
 from decimal import Decimal
+from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class CheckoutPreferenceRequest(BaseModel):
-    product_code: str = Field(default="test-product")
-    quantity: int = Field(default=1, gt=0, le=10)
+    product_code: Literal["1001"] = "1001"
+    quantity: Literal[1] = 1
 
 
 class CheckoutPreferenceResponse(BaseModel):
@@ -17,7 +18,9 @@ class CheckoutPreferenceResponse(BaseModel):
 
 
 class ProductQuote(BaseModel):
+    product_id: str
     title: str
+    description: str
+    picture_url: str
     unit_price: Decimal
     currency_id: str = "ARS"
-

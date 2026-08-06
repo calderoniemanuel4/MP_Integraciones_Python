@@ -10,9 +10,10 @@ from tests.conftest import FakeMP, MemoryOrderRepository
 @pytest.mark.asyncio
 async def test_create_order_and_preference() -> None:
     repo = MemoryOrderRepository()
+    mercado_pago = FakeMP()
     service = OrderService(
         repo,
-        FakeMP(),
+        mercado_pago,
         Settings(mp_access_token="token", mp_webhook_secret="secret"),
     )
     result = await service.create_checkout_preference(CheckoutPreferenceRequest())
@@ -20,8 +21,23 @@ async def test_create_order_and_preference() -> None:
     assert result.preference_id == "pref_123"
     assert result.checkout_url.startswith("https://www.mercadopago.com/")
     assert order.external_reference == result.order_id
+    assert order.title == "Tienda Móvil"
     assert order.internal_status == "preference_created"
     assert order.total_amount_minor == 150000
+    assert mercado_pago.preference_payload is not None
+    assert mercado_pago.preference_payload["items"] == [
+        {
+            "id": "1001",
+            "title": "Tienda Móvil",
+            "description": "Dispositivo de tienda móvil de comercio electrónico",
+            "picture_url": (
+                "https://mp-pagos-api.fastapicloud.dev/static/product-speaker.jpg"
+            ),
+            "quantity": 1,
+            "unit_price": 1500.0,
+            "currency_id": "ARS",
+        }
+    ]
 
 
 @pytest.mark.asyncio
