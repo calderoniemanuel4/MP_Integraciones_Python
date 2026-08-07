@@ -38,6 +38,10 @@ async def test_create_order_and_preference() -> None:
             "currency_id": "ARS",
         }
     ]
+    assert mercado_pago.preference_payload["payment_methods"] == {
+        "excluded_payment_methods": [{"id": "visa"}],
+        "installments": 6,
+    }
 
 
 @pytest.mark.asyncio

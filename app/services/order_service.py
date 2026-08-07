@@ -52,6 +52,10 @@ class OrderService:
                     "currency_id": quote.currency_id,
                 }
             ],
+            "payment_methods": {
+                "excluded_payment_methods": [{"id": "visa"}],
+                "installments": 6,
+            },
             "external_reference": order_id,
             "back_urls": {
                 "success": self.settings.mp_success_url,
