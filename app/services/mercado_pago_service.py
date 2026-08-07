@@ -15,10 +15,13 @@ class MercadoPagoAPIError(Exception):
 class MercadoPagoService:
     def __init__(self, settings: Settings, client: httpx.AsyncClient | None = None) -> None:
         self.settings = settings
+        headers = {"Authorization": f"Bearer {settings.mp_access_token}"}
+        if settings.mp_integrator_id:
+            headers["x-integrator-id"] = settings.mp_integrator_id
         self.client = client or httpx.AsyncClient(
             base_url=settings.mp_api_base_url,
             timeout=settings.request_timeout_seconds,
-            headers={"Authorization": f"Bearer {settings.mp_access_token}"},
+            headers=headers,
         )
 
     async def create_preference(self, payload: dict[str, Any]) -> dict[str, Any]:

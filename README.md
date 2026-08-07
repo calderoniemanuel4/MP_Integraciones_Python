@@ -123,6 +123,7 @@ automáticamente las variables de `.env`; si no existe, usa el emulador en
 
 Configurar en la app de prueba:
 
+- Integrator ID: `dev_24c65fb163bf11ea96500242ac130004`
 - Webhook: `https://mi-app.fastapicloud.com/webhooks/mercadopago`
 - Success: `https://mi-app.fastapicloud.com/checkout/success`
 - Failure: `https://mi-app.fastapicloud.com/checkout/failure`
