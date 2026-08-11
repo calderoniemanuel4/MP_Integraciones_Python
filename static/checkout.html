@@ -199,19 +199,38 @@
 
       #pay {
         width: 100%;
-        min-height: 54px;
+        height: 48px;
+        padding: 0 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
         border: 0;
-        border-radius: 4px;
+        border-radius: 6px;
         background: #009ee3;
         color: #fff;
-        font-weight: 850;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 14%);
+        font-size: .9rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: background-color 160ms ease, transform 160ms ease;
+        transition: background-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      #pay img {
+        width: 30px;
+        height: 30px;
+        flex: 0 0 30px;
+        display: block;
       }
 
       #pay:hover {
-        background: #087fba;
-        transform: translateY(-1px);
+        background: #008ed0;
+        box-shadow: 0 2px 5px rgb(0 0 0 / 18%);
+      }
+
+      #pay:active {
+        background: #007eb5;
+        box-shadow: 0 1px 2px rgb(0 0 0 / 14%);
       }
 
       #pay:focus-visible {
@@ -222,7 +241,7 @@
       #pay:disabled {
         opacity: .58;
         cursor: wait;
-        transform: none;
+        box-shadow: none;
       }
 
       #status {
@@ -236,10 +255,10 @@
       #status.error { color: #a23535; }
 
       .secure-note {
-        margin: auto 0 0;
-        padding-top: 34px;
+        margin: 12px 0 0;
         color: #7a8583;
         font-size: .75rem;
+        font-weight: 650;
         line-height: 1.5;
         text-align: center;
       }
@@ -303,9 +322,12 @@
           <input id="quantity" type="number" value="1" min="1" max="1" inputmode="numeric" readonly>
         </div>
         <p class="total"><span>Total</span><strong id="total">ARS 1.500,00</strong></p>
-        <button id="pay">Pagar con Mercado Pago</button>
+        <button id="pay" type="button">
+          <img src="/static/mercadopago.svg" alt="" aria-hidden="true">
+          <span>Pagar con Mercado Pago</span>
+        </button>
         <p id="status" role="status"></p>
-        <p class="secure-note">El pago continúa en el entorno seguro de Mercado Pago.</p>
+        <p class="secure-note">Paga de forma segura</p>
       </section>
     </main>
     <script>

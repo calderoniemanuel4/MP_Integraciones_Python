@@ -18,6 +18,7 @@ def test_frontend_is_served_by_the_api() -> None:
     assert "Tienda Móvil" in response.text
     assert "window.location.origin" in response.text
     assert "/static/product-speaker.jpg" in response.text
+    assert "/static/mercadopago.svg" in response.text
 
 
 def test_checkout_product_image_is_served() -> None:
@@ -26,6 +27,14 @@ def test_checkout_product_image_is_served() -> None:
 
     assert response.status_code == 200
     assert response.headers["content-type"] == "image/jpeg"
+
+
+def test_mercado_pago_button_icon_is_served() -> None:
+    with TestClient(app) as client:
+        response = client.get("/static/mercadopago.svg")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "image/svg+xml"
 
 
 def test_webhook_rejects_malformed_json_as_bad_request() -> None:
