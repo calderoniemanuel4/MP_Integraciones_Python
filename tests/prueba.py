@@ -16,7 +16,4 @@ vendedor
 TESTUSER5924716395395326701
 LWeiGLVwJs
 
-Integrator ID
-dev_24c65fb163bf11ea96500242ac130004
-
 """
