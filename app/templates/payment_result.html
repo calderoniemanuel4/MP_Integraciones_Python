@@ -8,8 +8,9 @@
     <link rel="stylesheet" href="/static/checkout-result.css">
   </head>
   <body>
-    {% set is_approved = payment.status == "approved" %}
-    {% set is_pending = payment.status in ["pending", "in_process", "authorized"] %}
+    {% set has_payment = payment is not none %}
+    {% set is_approved = has_payment and payment.status == "approved" %}
+    {% set is_pending = has_payment and payment.status in ["pending", "in_process", "authorized"] %}
     <header class="site-header">
       <p class="wordmark">Tienda demo</p>
       <p class="header-note">Checkout Pro · Mercado Pago</p>
@@ -17,8 +18,11 @@
     <main class="result-shell">
       <section class="result-hero{% if is_pending %} pending{% elif not is_approved %} rejected{% endif %}">
         <div class="status-icon" aria-hidden="true"></div>
-        <p class="eyebrow">Resultado verificado</p>
-        {% if is_approved %}
+        <p class="eyebrow">{% if has_payment %}Resultado verificado{% else %}Operación finalizada{% endif %}</p>
+        {% if not has_payment %}
+          <h1>No se generó un pago</h1>
+          <p class="hero-copy">No hay una operación de Mercado Pago para consultar. Podés volver a la tienda cuando quieras.</p>
+        {% elif is_approved %}
           <h1>Pago confirmado</h1>
           <p class="hero-copy">Tu compra fue acreditada. La información se validó directamente con Mercado Pago.</p>
         {% elif is_pending %}
@@ -36,20 +40,26 @@
       <section class="receipt">
         <p class="receipt-kicker">Resumen de la operación</p>
         <p class="amount">{{ display_amount }}</p>
-        <p class="verification">Estado consultado contra Mercado Pago</p>
+        <p class="verification">{% if verified %}Estado consultado contra Mercado Pago{% else %}No se generó un pago para consultar{% endif %}</p>
         <dl class="details">
-          <dt>Estado</dt><dd>{{ payment.status }}</dd>
-          <dt>Detalle</dt><dd>{{ payment.status_detail or "-" }}</dd>
-          <dt>Medio de pago</dt><dd>{{ payment.payment_method_id or "-" }}</dd>
-          <dt>Tipo</dt><dd>{{ payment.payment_type_id or "-" }}</dd>
-          <dt>Orden</dt><dd>{{ payment.order_id or "-" }}</dd>
-          <dt>Referencia</dt><dd>{{ payment.external_reference or "-" }}</dd>
-          <dt>Fecha</dt><dd>{{ payment.date_last_updated or payment.date_created or "-" }}</dd>
+          {% if has_payment %}
+            <dt>Estado</dt><dd>{{ payment.status }}</dd>
+            <dt>Detalle</dt><dd>{{ payment.status_detail or "-" }}</dd>
+            <dt>Medio de pago</dt><dd>{{ payment.payment_method_id or "-" }}</dd>
+            <dt>Tipo</dt><dd>{{ payment.payment_type_id or "-" }}</dd>
+            <dt>Orden</dt><dd>{{ payment.order_id or "-" }}</dd>
+            <dt>Referencia</dt><dd>{{ payment.external_reference or external_reference or "-" }}</dd>
+            <dt>Fecha</dt><dd>{{ payment.date_last_updated or payment.date_created or "-" }}</dd>
+          {% else %}
+            <dt>Estado</dt><dd>{{ return_status or "Sin pago" }}</dd>
+            <dt>Referencia</dt><dd>{{ external_reference or "-" }}</dd>
+            <dt>Preferencia</dt><dd>{{ preference_id or "-" }}</dd>
+          {% endif %}
           <dt>Retorno</dt><dd>{{ outcome }}</dd>
         </dl>
         <div class="actions">
           <a class="back-link" href="/">Volver a la tienda</a>
-          <span class="payment-id">ID de pago {{ payment.mercado_pago_payment_id }}</span>
+          <span class="payment-id">{% if has_payment %}ID de pago {{ payment.mercado_pago_payment_id }}{% else %}Sin ID de pago{% endif %}</span>
         </div>
       </section>
     </main>

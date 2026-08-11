@@ -80,6 +80,7 @@ class FakeMP:
         self.payment = payment
         self.preference_error = preference_error
         self.preference_payload: dict | None = None
+        self.requested_payment_ids: list[str] = []
 
     async def create_preference(self, payload: dict) -> dict:
         self.preference_payload = payload
@@ -94,6 +95,7 @@ class FakeMP:
         }
 
     async def get_payment(self, payment_id: str) -> dict:
+        self.requested_payment_ids.append(payment_id)
         return self.payment or {
             "id": payment_id,
             "external_reference": "order-1",

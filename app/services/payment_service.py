@@ -92,6 +92,21 @@ class PaymentService:
         )
         return payment
 
+    async def mark_checkout_cancelled(self, external_reference: str) -> bool:
+        order = await self.order_repository.get(external_reference)
+        if order is None:
+            return False
+        if not can_transition(order.internal_status, "cancelled"):
+            logger.info(
+                "Checkout cancellation ignored order_id=%s current_status=%s",
+                order.order_id,
+                order.internal_status,
+            )
+            return False
+        await self.order_repository.update(order.order_id, {"internal_status": "cancelled"})
+        logger.info("Checkout cancelled order_id=%s", order.order_id)
+        return True
+
     def payment_from_mp(self, raw_payment: dict[str, Any]) -> Payment:
         currency_id = raw_payment.get("currency_id")
         amount_minor = None
