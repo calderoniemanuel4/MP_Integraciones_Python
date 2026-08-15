@@ -21,7 +21,7 @@
         background: #f2f5f4;
       }
 
-      select { font: inherit; }
+      button { font: inherit; }
 
       .site-header {
         width: min(100% - 40px, 1180px);
@@ -157,31 +157,50 @@
         margin-bottom: 28px;
       }
 
-      label {
+      #quantity-label {
         font-size: .87rem;
         font-weight: 800;
       }
 
-      select {
+      .quantity-control {
         width: 100%;
         min-height: 46px;
-        padding: 8px 10px;
+        display: grid;
+        grid-template-columns: 36px 1fr 36px;
+        align-items: stretch;
         border: 1px solid #aeb9b6;
         border-radius: 4px;
-        color: inherit;
         background: #fff;
+        overflow: hidden;
+      }
+
+      .quantity-control button {
+        border: 0;
+        color: #18201f;
+        background: #eef2f1;
+        cursor: pointer;
+        font-size: 1.15rem;
+        font-weight: 800;
+      }
+
+      .quantity-control button:hover:not(:disabled) { background: #dfe7e5; }
+
+      .quantity-control button:disabled {
+        color: #aeb7b5;
+        cursor: not-allowed;
+      }
+
+      .quantity-control output {
+        display: grid;
+        place-items: center;
+        color: inherit;
         font-weight: 750;
         text-align: center;
       }
 
-      select:focus {
+      .quantity-control:focus-within {
         outline: 3px solid rgb(0 158 227 / 18%);
         border-color: #009ee3;
-      }
-
-      select:disabled {
-        cursor: wait;
-        opacity: .65;
       }
 
       .total {
@@ -211,6 +230,8 @@
         width: 100%;
         min-height: 48px;
       }
+
+      .wallet-shell:not(.ready) #walletBrick_container { display: none; }
 
       .wallet-loading {
         width: 100%;
@@ -289,12 +310,12 @@
         <p class="description">Dispositivo de tienda móvil de comercio electrónico</p>
         <p class="unit-price">ARS 1.500,00 <small>por unidad</small></p>
         <div class="field">
-          <label for="quantity">Cantidad</label>
-          <select id="quantity" aria-label="Cantidad del producto">
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
+          <span id="quantity-label">Cantidad</span>
+          <div class="quantity-control" role="group" aria-labelledby="quantity-label">
+            <button id="decrease-quantity" type="button" aria-label="Disminuir cantidad" disabled>&minus;</button>
+            <output id="quantity" aria-live="polite">1</output>
+            <button id="increase-quantity" type="button" aria-label="Aumentar cantidad">+</button>
+          </div>
         </div>
         <p class="total"><span>Total</span><strong id="total">ARS 1.500,00</strong></p>
         <div class="wallet-shell" id="wallet-shell" aria-busy="true">
@@ -305,6 +326,6 @@
       </section>
     </main>
     <script src="https://sdk.mercadopago.com/js/v2"></script>
-    <script src="/static/checkout.js"></script>
+    <script src="/static/checkout.js?v=quantity-stepper-1"></script>
   </body>
 </html>

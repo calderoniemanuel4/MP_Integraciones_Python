@@ -16,11 +16,14 @@ def test_frontend_is_served_by_the_api() -> None:
     with TestClient(app) as client:
         response = client.get("/")
     assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
     assert "Tienda Móvil" in response.text
     assert "/static/product-speaker.jpg" in response.text
     assert "https://sdk.mercadopago.com/js/v2" in response.text
     assert 'id="walletBrick_container"' in response.text
-    assert "/static/checkout.js" in response.text
+    assert "/static/checkout.js?v=quantity-stepper-1" in response.text
+    assert 'id="decrease-quantity"' in response.text
+    assert 'id="increase-quantity"' in response.text
 
 
 def test_checkout_product_image_is_served() -> None:
@@ -39,7 +42,9 @@ def test_checkout_script_uses_public_key_and_preference_id() -> None:
     assert "new MercadoPago(config.public_key" in response.text
     assert "preferenceId: preference.preference_id" in response.text
     assert 'bricksBuilder.create("wallet"' in response.text
-    assert "quantityInput.addEventListener(\"change\", initializeWalletBrick)" in response.text
+    assert "increaseQuantityButton.addEventListener" in response.text
+    assert "decreaseQuantityButton.addEventListener" in response.text
+    assert "const quantity = selectedQuantity()" in response.text
     assert "window.location.assign" not in response.text
 
 

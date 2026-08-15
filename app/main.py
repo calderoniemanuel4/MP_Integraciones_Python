@@ -34,7 +34,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/", include_in_schema=False)
 async def frontend() -> FileResponse:
-    return FileResponse(checkout_page)
+    return FileResponse(checkout_page, headers={"Cache-Control": "no-store"})
 
 
 app.add_middleware(
