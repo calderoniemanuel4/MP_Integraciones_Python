@@ -17,6 +17,10 @@ class CheckoutPreferenceResponse(BaseModel):
     sandbox_checkout_url: str | None = None
 
 
+class CheckoutConfigResponse(BaseModel):
+    public_key: str
+
+
 class ProductQuote(BaseModel):
     product_id: str
     title: str

@@ -123,13 +123,18 @@ automáticamente las variables de `.env`; si no existe, usa el emulador en
 
 Configurar en la app de prueba:
 
+- Public Key: variable `MP_PUBLIC_KEY` usada por MercadoPago.js en el frontend.
 - Integrator ID: `dev_24c65fb163bf11ea96500242ac130004`
 - Webhook: `https://mi-app.fastapicloud.com/webhooks/mercadopago`
 - Success: `https://mi-app.fastapicloud.com/checkout/success`
 - Failure: `https://mi-app.fastapicloud.com/checkout/failure`
 - Pending: `https://mi-app.fastapicloud.com/checkout/pending`
 
-`init_point` es la URL de Checkout Pro para credenciales productivas. `sandbox_init_point` es la URL de prueba. Con credenciales TEST normalmente usarás la sandbox.
+El frontend obtiene `MP_PUBLIC_KEY` desde `GET /checkout/config`, crea la preferencia en
+el backend y entrega su `preference_id` al Wallet Brick oficial. `init_point` y
+`sandbox_init_point` se conservan en la orden para trazabilidad y compatibilidad.
+La Public Key puede exponerse al navegador; `MP_ACCESS_TOKEN` debe permanecer únicamente
+en el entorno seguro del backend.
 
 No confiar en `?status=approved` de la back URL. La app siempre consulta `GET /v1/payments/{payment_id}`.
 

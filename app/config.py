@@ -17,6 +17,7 @@ class Settings(BaseSettings):
 
     environment: str = "development"
     mp_access_token: str = Field(default="", validation_alias="MP_ACCESS_TOKEN")
+    mp_public_key: str = Field(default="", validation_alias="MP_PUBLIC_KEY")
     mp_webhook_secret: str = Field(default="", validation_alias="MP_WEBHOOK_SECRET")
     mp_integrator_id: str = Field(
         default="dev_24c65fb163bf11ea96500242ac130004",
