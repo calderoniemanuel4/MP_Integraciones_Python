@@ -1,12 +1,11 @@
 from decimal import Decimal
-from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CheckoutPreferenceRequest(BaseModel):
     product_code: str = "1001"
-    quantity: Literal[1] = 1
+    quantity: int = Field(default=1, ge=1, le=3)
 
 
 class CheckoutPreferenceResponse(BaseModel):

@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 
 from app.config import Settings
 from app.schemas.checkout import CheckoutPreferenceRequest
@@ -42,6 +43,33 @@ async def test_create_order_and_preference() -> None:
         "excluded_payment_methods": [{"id": "visa"}],
         "installments": 6,
     }
+
+
+@pytest.mark.asyncio
+async def test_create_preference_with_maximum_quantity() -> None:
+    repo = MemoryOrderRepository()
+    mercado_pago = FakeMP()
+    service = OrderService(
+        repo,
+        mercado_pago,
+        Settings(mp_access_token="token", mp_webhook_secret="secret"),
+    )
+
+    result = await service.create_checkout_preference(
+        CheckoutPreferenceRequest(quantity=3)
+    )
+
+    order = await repo.get(result.order_id)
+    assert order.quantity == 3
+    assert order.total_amount_minor == 450000
+    assert mercado_pago.preference_payload is not None
+    assert mercado_pago.preference_payload["items"][0]["quantity"] == 3
+
+
+@pytest.mark.parametrize("quantity", [0, 4])
+def test_checkout_quantity_must_be_between_one_and_three(quantity: int) -> None:
+    with pytest.raises(ValidationError):
+        CheckoutPreferenceRequest(quantity=quantity)
 
 
 @pytest.mark.asyncio

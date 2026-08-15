@@ -21,7 +21,7 @@
         background: #f2f5f4;
       }
 
-      input { font: inherit; }
+      select { font: inherit; }
 
       .site-header {
         width: min(100% - 40px, 1180px);
@@ -162,7 +162,7 @@
         font-weight: 800;
       }
 
-      input {
+      select {
         width: 100%;
         min-height: 46px;
         padding: 8px 10px;
@@ -174,9 +174,14 @@
         text-align: center;
       }
 
-      input:focus {
+      select:focus {
         outline: 3px solid rgb(0 158 227 / 18%);
         border-color: #009ee3;
+      }
+
+      select:disabled {
+        cursor: wait;
+        opacity: .65;
       }
 
       .total {
@@ -285,7 +290,11 @@
         <p class="unit-price">ARS 1.500,00 <small>por unidad</small></p>
         <div class="field">
           <label for="quantity">Cantidad</label>
-          <input id="quantity" type="number" value="1" min="1" max="1" inputmode="numeric" readonly>
+          <select id="quantity" aria-label="Cantidad del producto">
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
         </div>
         <p class="total"><span>Total</span><strong id="total">ARS 1.500,00</strong></p>
         <div class="wallet-shell" id="wallet-shell" aria-busy="true">

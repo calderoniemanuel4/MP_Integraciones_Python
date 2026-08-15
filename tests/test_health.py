@@ -39,6 +39,7 @@ def test_checkout_script_uses_public_key_and_preference_id() -> None:
     assert "new MercadoPago(config.public_key" in response.text
     assert "preferenceId: preference.preference_id" in response.text
     assert 'bricksBuilder.create("wallet"' in response.text
+    assert "quantityInput.addEventListener(\"change\", initializeWalletBrick)" in response.text
     assert "window.location.assign" not in response.text
 
 
